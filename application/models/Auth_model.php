@@ -43,7 +43,23 @@ class Auth_model extends CI_Model
 
 		return $this->session->has_userdata(self::SESSION_KEY);
 	}
+	public function is_valid($username, $password)
+	{
+		$this->db->where('username', $username);
+		$query = $this->db->get($this->_table);
+		$user = $query->row();
 
+		// cek apakah user sudah terdaftar?
+		if (!$user) {
+			return FALSE;
+		}
+
+		// cek apakah passwordnya benar?
+		if (!password_verify($password, $user->password)) {
+			return FALSE;
+		}
+		return $user->id;
+	}
 	public function current_user()
 	{
 		if (!$this->session->has_userdata(self::SESSION_KEY)) {
@@ -52,6 +68,12 @@ class Auth_model extends CI_Model
 
 		$user_id = $this->session->userdata(self::SESSION_KEY);
 		$query = $this->db->get_where($this->_table, ['id' => $user_id]);
+		return $query->row();
+	}
+	public function get_one($username)
+	{
+		$this->db->where('username', $username);
+		$query = $this->db->get($this->_table);
 		return $query->row();
 	}
 
